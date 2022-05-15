@@ -7,6 +7,14 @@
 
 import UIKit
 
+enum Sections: Int {
+    case TrendingMovies = 0
+    case TrendingTv = 1
+    case Popular = 2
+    case Upcoming = 3
+    case TopRated = 4
+}
+
 class HomeViewController: UIViewController {
     
     private lazy var homeFeedTableView: UITableView = {
@@ -29,8 +37,6 @@ class HomeViewController: UIViewController {
         homeFeedTableView.tableHeaderView = headerView
         
         configureNavBar()
-       // getTrendingMovies()
-        fetchData()
     }
     
     override func viewDidLayoutSubviews() {
@@ -38,7 +44,7 @@ class HomeViewController: UIViewController {
     }
     
     private func configureNavBar () {
-        let image = UIImage(named: "netflixLogo")?.withRenderingMode(.alwaysOriginal)
+        let image = UIImage(named: "appLogo")?.withRenderingMode(.alwaysOriginal)
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: image, style: .done, target: self, action: nil)
         
         navigationItem.rightBarButtonItems = [
@@ -46,26 +52,6 @@ class HomeViewController: UIViewController {
             UIBarButtonItem(image: UIImage(systemName: "play.rectangle"), style: .done, target: self, action: nil)
         ]
         navigationController?.navigationBar.tintColor = .white
-    }
-    
-    private func fetchData() {
-        API.shared.getTrendingTvs { results in
-            print(results)
-        }
-        
-        
-    }
-    
-    private func getTrendingMovies() {
-        API.shared.getTrendingMovies { results in
-            switch results {
-            case .success(let movies):
-                print(movies)
-            case .failure(let error):
-                print(error)
-            }
-            
-        }
     }
     
     // hide navigation bar when scroll down ..
@@ -92,6 +78,59 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             return UITableViewCell()
         }
         
+        switch indexPath.section {
+        case Sections.TrendingMovies.rawValue:
+            API.shared.getTrendingMovies { result in
+                switch result {
+                case .success(let titles):
+                    cell.configure(with: titles)
+                case .failure(let error):
+                    print(error)
+                }
+            }
+            
+        case Sections.TrendingTv.rawValue:
+            API.shared.getTrendingTvs { result in
+                switch result {
+                case .success(let titles):
+                    cell.configure(with: titles)
+                case .failure(let error):
+                    print(error)
+                }
+            }
+            
+        case Sections.Popular.rawValue:
+            API.shared.getPopular { result in
+                switch result {
+                case .success(let titles):
+                    cell.configure(with: titles)
+                case .failure(let error):
+                    print(error)
+                }
+            }
+            
+        case Sections.Upcoming.rawValue:
+            API.shared.getUpcomingMovies { result in
+                switch result {
+                case .success(let titles):
+                    cell.configure(with: titles)
+                case .failure(let error):
+                    print(error)
+                }
+            }
+            
+        case Sections.TopRated.rawValue:
+            API.shared.getTopRated { result in
+                switch result {
+                case .success(let titles):
+                    cell.configure(with: titles)
+                case .failure(let error):
+                    print(error)
+                }
+            }
+        default:
+            return UITableViewCell()
+        }
         return cell
     }
     

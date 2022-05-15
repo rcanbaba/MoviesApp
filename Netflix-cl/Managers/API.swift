@@ -10,6 +10,7 @@ import Foundation
 struct APIConstants {
     static let API_KEY = "f73bb57f5d978cd566999c467673d266"
     static let baseURL = "https://api.themoviedb.org"
+    static let imageUrlPrefix = "https://image.tmdb.org/t/p/w500/"
 }
 
 struct Endpoints {
@@ -23,8 +24,7 @@ struct Endpoints {
 //&language=en-US&page=1"
 
 enum APIError: Error {
-    case failedToGetData
-    
+    case failedToGetData    
 }
 
 class API {
@@ -39,7 +39,6 @@ class API {
             guard let data = data, error == nil else { return }
             do {
                 let results = try JSONDecoder().decode(TrendingTitleResponse.self, from: data)
-                print(results)
                 completion(.success(results.results))
             } catch {
                 completion(.failure(error))
@@ -48,16 +47,16 @@ class API {
         task.resume()
     }
     
-    func getTrendingTvs(completion: @escaping (Result<[Tv], Error>) -> Void) {
+    func getTrendingTvs(completion: @escaping (Result<[Title], Error>) -> Void) {
         guard let url = URL(string: APIConstants.baseURL + Endpoints.trendingTvs + APIConstants.API_KEY) else { return }
         
         let task = URLSession.shared.dataTask(with: URLRequest(url: url)) { data, response, error in
             guard let data = data, error == nil else { return }
             do {
-                let results = try JSONDecoder().decode(TrendingTvResponse.self, from: data)
-                print(results)
+                let results = try JSONDecoder().decode(TrendingTitleResponse.self, from: data)
+                completion(.success(results.results))
             } catch {
-                print(error.localizedDescription)
+                completion(.failure(error))
             }
         }
         task.resume()
@@ -70,9 +69,9 @@ class API {
             guard let data = data, errror == nil else { return }
             do {
                 let results = try JSONDecoder().decode(TrendingTitleResponse.self, from: data)
-                print(results)
+                completion(.success(results.results))
             } catch {
-                print(error.localizedDescription)
+                completion(.failure(error))
             }
         }
         task.resume()
@@ -85,9 +84,9 @@ class API {
             guard let data = data, errror == nil else { return }
             do {
                 let results = try JSONDecoder().decode(TrendingTitleResponse.self, from: data)
-                print(results)
+                completion(.success(results.results))
             } catch {
-                print(error.localizedDescription)
+                completion(.failure(error))
             }
         }
         task.resume()
@@ -100,9 +99,9 @@ class API {
             guard let data = data, errror == nil else { return }
             do {
                 let results = try JSONDecoder().decode(TrendingTitleResponse.self, from: data)
-                print(results)
+                completion(.success(results.results))
             } catch {
-                print(error.localizedDescription)
+                completion(.failure(error))
             }
         }
         task.resume()
