@@ -11,6 +11,8 @@ struct APIConstants {
     static let API_KEY = "f73bb57f5d978cd566999c467673d266"
     static let baseURL = "https://api.themoviedb.org"
     static let imageUrlPrefix = "https://image.tmdb.org/t/p/w500/"
+    static let youtubeAPI_KEY = "AIzaSyC7LP6SIOzTVv2N48mVmObkuxWqpliHvso"
+    static let youtubeBaseURL = "https://youtube.googleapis.com/youtube"
 }
 
 struct Endpoints {
@@ -21,10 +23,10 @@ struct Endpoints {
     static let topRatedMovies = "/3/movie/top_rated?api_key="
     static let discoverMovies = "/3/discover/movie?api_key="
     static let search = "/3/search/movie?api_key="
+    static let youtubeSearch = "/v3/search?q="
 }
 // dil için gerekebilir gibi
 //&language=en-US&page=1"
-
 
 enum APIError: Error {
     case failedToGetData    
@@ -133,6 +135,22 @@ class API {
             do {
                 let results = try JSONDecoder().decode(TrendingTitleResponse.self, from: data)
                 completion(.success(results.results))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        task.resume()
+    }
+    
+    func searchOnYoutube(with query: String, completion: @escaping (Result<VideoItem, Error>) -> Void) {
+        guard let query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else { return }
+        guard let url = URL(string: APIConstants.youtubeBaseURL + Endpoints.youtubeSearch + query + "&key=" + APIConstants.youtubeAPI_KEY) else { return }
+        
+        let task = URLSession.shared.dataTask(with: URLRequest(url: url)) { data, response, errror in
+            guard let data = data, errror == nil else { return }
+            do {
+                let results = try JSONDecoder().decode(YoutubeSearchResponse.self, from: data)
+                completion(.success(results.items[0]))
             } catch {
                 completion(.failure(error))
             }
