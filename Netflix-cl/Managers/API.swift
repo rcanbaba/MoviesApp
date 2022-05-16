@@ -19,9 +19,12 @@ struct Endpoints {
     static let upcomingMovies = "/3/movie/upcoming?api_key="
     static let popularMovies = "/3/movie/popular?api_key="
     static let topRatedMovies = "/3/movie/top_rated?api_key="
+    static let discoverMovies = "/3/discover/movie?api_key="
+    static let search = "/3/search/movie?api_key="
 }
 // dil için gerekebilir gibi
 //&language=en-US&page=1"
+
 
 enum APIError: Error {
     case failedToGetData    
@@ -30,8 +33,7 @@ enum APIError: Error {
 class API {
     
     static let shared = API()
-    
-    
+        
     func getTrendingMovies(completion: @escaping (Result<[Title], Error>) -> Void) {
         guard let url = URL(string: APIConstants.baseURL + Endpoints.trendingMovies + APIConstants.API_KEY) else { return }
         
@@ -94,6 +96,37 @@ class API {
     
     func getTopRated(completion: @escaping (Result<[Title], Error>) -> Void) {
         guard let url = URL(string: APIConstants.baseURL + Endpoints.topRatedMovies + APIConstants.API_KEY) else { return }
+        
+        let task = URLSession.shared.dataTask(with: URLRequest(url: url)) { data, response, errror in
+            guard let data = data, errror == nil else { return }
+            do {
+                let results = try JSONDecoder().decode(TrendingTitleResponse.self, from: data)
+                completion(.success(results.results))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        task.resume()
+    }
+    
+    func getDiscoverMovies(completion: @escaping (Result<[Title], Error>) -> Void) {
+        guard let url = URL(string: APIConstants.baseURL + Endpoints.discoverMovies + APIConstants.API_KEY + "&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&with_watch_monetization_types=flatrate") else { return }
+        
+        let task = URLSession.shared.dataTask(with: URLRequest(url: url)) { data, response, errror in
+            guard let data = data, errror == nil else { return }
+            do {
+                let results = try JSONDecoder().decode(TrendingTitleResponse.self, from: data)
+                completion(.success(results.results))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        task.resume()
+    }
+    
+    func search(with query: String, completion: @escaping (Result<[Title], Error>) -> Void) {
+        guard let query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else { return }
+        guard let url = URL(string: APIConstants.baseURL + Endpoints.search + APIConstants.API_KEY + "&query=" + query) else { return }
         
         let task = URLSession.shared.dataTask(with: URLRequest(url: url)) { data, response, errror in
             guard let data = data, errror == nil else { return }
