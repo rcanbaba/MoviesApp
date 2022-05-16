@@ -7,9 +7,15 @@
 
 import UIKit
 
+protocol CollectionViewTableViewCellDelegate: AnyObject {
+    func cellTapped(cell: CollectionViewTableViewCell, viewModel: TitlePreviewViewModel)
+}
+
 class CollectionViewTableViewCell: UITableViewCell {
 
     static let identifier = "CollectionViewTableViewCell"
+    
+    weak var delegate: CollectionViewTableViewCellDelegate?
     
     private var titles: [Title] = [Title]()
     
@@ -71,10 +77,18 @@ extension CollectionViewTableViewCell: UICollectionViewDelegate, UICollectionVie
         let title = titles[indexPath.row]
         guard let titleName = title.original_title ?? title.original_name else { return }
         
-        API.shared.searchOnYoutube(with: titleName + " trailer") { result in
+        API.shared.searchOnYoutube(with: titleName + " trailer") { [weak self] result in
             switch result {
             case .success(let videoItem):
-                print(videoItem)
+                
+                let title = self?.titles[indexPath.row]
+                guard let titleOverview = title?.overview else { return }
+                let viewModel = TitlePreviewViewModel(title: titleName, youtubeView: videoItem, titleOverview: titleOverview)
+                guard let strongSelf = self else {
+                    return
+                }
+                self?.delegate?.cellTapped(cell: strongSelf, viewModel: viewModel)
+                
             case .failure(let error):
                 print(error.localizedDescription)
             }
