@@ -40,12 +40,13 @@ class HomeViewController: UIViewController {
         homeFeedTableView.tableHeaderView = headerView
         
         configureNavBar()
+        configureHeroHeaderView()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        configureHeroHeaderView()
+
     }
     
     override func viewDidLayoutSubviews() {
