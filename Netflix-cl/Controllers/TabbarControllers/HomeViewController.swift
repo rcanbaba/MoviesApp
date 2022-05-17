@@ -23,6 +23,9 @@ class HomeViewController: UIViewController {
         return table
     }()
     
+    private var randomTrendingMovie: Title?
+    private var headerView: HeroHeaderUIView?
+    
     let sectionTitles: [String] = ["Trending Movies", "Trending Tv", "Popular", "Upcoming Movies", "Top rated"]
 
     override func viewDidLoad() {
@@ -33,10 +36,16 @@ class HomeViewController: UIViewController {
         homeFeedTableView.delegate = self
         homeFeedTableView.dataSource = self
         
-        let headerView = HeroHeaderUIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 450))
+        headerView = HeroHeaderUIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 450))
         homeFeedTableView.tableHeaderView = headerView
         
         configureNavBar()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        configureHeroHeaderView()
     }
     
     override func viewDidLayoutSubviews() {
@@ -52,6 +61,19 @@ class HomeViewController: UIViewController {
             UIBarButtonItem(image: UIImage(systemName: "play.rectangle"), style: .done, target: self, action: nil)
         ]
         navigationController?.navigationBar.tintColor = .white
+    }
+    
+    private func configureHeroHeaderView() {
+        API.shared.getTrendingTvs { [weak self] result in
+            switch result {
+            case .success(let titles):
+                let randomTitle = titles.randomElement()
+                self?.randomTrendingMovie = randomTitle
+                self?.headerView?.configure(with: TitleViewModel(titleName: randomTitle?.original_title ?? "" , posterURL: randomTitle?.poster_path ?? ""))
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
     }
     
     // hide navigation bar when scroll down ..

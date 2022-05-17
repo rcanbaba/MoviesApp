@@ -37,8 +37,6 @@ class HeroHeaderUIView: UIView {
         return imageView
     }()
     
-    
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         configureUI()
@@ -85,4 +83,9 @@ class HeroHeaderUIView: UIView {
         layer.addSublayer(gradientLayer)
     }
 
+    public func configure(with model: TitleViewModel) {
+        guard let url = URL(string: APIConstants.imageUrlPrefix + (model.posterURL)) else { return }
+        heroImageView.sd_setImage(with: url, completed: nil)
+    }
+    
 }
