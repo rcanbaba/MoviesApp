@@ -48,6 +48,18 @@ class CollectionViewTableViewCell: UITableViewCell {
         collectionView.frame = contentView.bounds
     }
     
+    private func downloadTitle(at: IndexPath) {
+        DataPersistenceManager.shared.downloadTitleWith(model: titles[at.row]) { result in
+            switch result {
+            case .success():
+                print("downloaded from Database")
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+        
+    }
+    
     public func configure(with titles: [Title]) {
         self.titles = titles
         DispatchQueue.main.async { [weak self] in
@@ -97,9 +109,9 @@ extension CollectionViewTableViewCell: UICollectionViewDelegate, UICollectionVie
     
     func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         
-        let config = UIContextMenuConfiguration (identifier: nil, previewProvider: nil) { _ in
+        let config = UIContextMenuConfiguration (identifier: nil, previewProvider: nil) { [weak self] _ in
             let downloadAction = UIAction(title: "Download", subtitle: nil, image: nil, identifier: nil, discoverabilityTitle: nil, state: .off) { _ in
-                print("Download tapped")
+                self?.downloadTitle(at: indexPath)
             }
             return UIMenu(title: "", image: nil, identifier: nil, options: .displayInline, children: [downloadAction])
         }
